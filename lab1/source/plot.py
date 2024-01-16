@@ -13,11 +13,10 @@ matplotlib.use('Qt5Agg')
 
 class MplCanvas(FigureCanvasQTAgg):
 
-    def __init__(self, strategy: SmoothStrategy, parent=None, width=5, height=4, dpi=100):
+    def __init__(self, parent=None, width=5, height=4, dpi=100):
         fig = Figure(figsize=(width, height), dpi=dpi)
         self.axes = fig.add_subplot(111)
         super(MplCanvas, self).__init__(fig)
-        self.sm_strategy = strategy
 
 
 class PlotLayout(QVBoxLayout, QWidget):
@@ -31,13 +30,14 @@ class PlotLayout(QVBoxLayout, QWidget):
         self.noise_lvl_changed.connect(self.draw_plot)
         self.strategy_changed.connect(self.draw_plot)
         self.params_changed.connect(self.draw_plot)
-        self.y_scale = 0
-
         # ---------------------------------------------------------------------------------
 
+        self.y_scale = 0
+        self.sm_strategy = MovingAverage()
+        # Передаем параметры в словарь
         self.params = {'a1': a1, 'a2': a2, 'a3': a3, 'b1': b1, 'b2': b2, 'b3': b3, 'x0': x0, 'xk': xk, 'dx': dx}
         # Create the maptlotlib FigureCanvas object,
-        self.sc = MplCanvas(Exponential(), self, width=5, height=4, dpi=100)
+        self.sc = MplCanvas(self, width=5, height=4, dpi=100)
 
         # Generate the signal
         self.noise_lvl = 0
@@ -49,10 +49,8 @@ class PlotLayout(QVBoxLayout, QWidget):
         self.addWidget(self.sc)
         self.draw_plot()
 
-
-
     def change_noise_lvl(self, lvl):
-        self.noise_lvl = lvl/100
+        self.noise_lvl = lvl / 100
         self.noise_lvl_changed.emit()
 
     def draw_plot(self):
@@ -65,7 +63,7 @@ class PlotLayout(QVBoxLayout, QWidget):
         # Генерация шума и добавление его к y
         noise = np.random.normal(0, self.noise_lvl, len(y))
         y_noisy = y + noise
-        y_smooth = self.sc.sm_strategy.get_y(y_noisy)
+        y_smooth = self.sm_strategy.get_y(y_noisy)
 
         self.sc.axes.plot(x, y, label='Оригинальный сигнал')
         self.sc.axes.plot(x, y_noisy, label='Искаженный сигнал')
@@ -76,7 +74,7 @@ class PlotLayout(QVBoxLayout, QWidget):
         # Зафиксировать ось Y
         self.sc.axes.set_ylim([-5 - self.y_scale, 5 + self.y_scale])
         # Задать название графика
-        self.sc.axes.set_title('Исследуемая функция:\n'  
+        self.sc.axes.set_title('Исследуемая функция:\n'
                                f"y(x) = {self.params['a1']: .2f} * sin({self.params['b1']: .2f} * x) + "
                                f"{self.params['a2']: .2f} * sin({self.params['b2']: .2f} * x) + "
                                f"{self.params['a3']: .2f} * sin({self.params['b3']: .2f} * x)")
@@ -87,13 +85,13 @@ class PlotLayout(QVBoxLayout, QWidget):
     def change_strategy(self, checkbox: str) -> None:
         match checkbox:
             case "Exponential":
-                self.sc.sm_strategy = Exponential()
+                self.sm_strategy = Exponential()
             case "Gaussian":
-                self.sc.sm_strategy = Gaussian()
+                self.sm_strategy = Gaussian()
             case "Median":
-                self.sc.sm_strategy = Median()
+                self.sm_strategy = Median()
             case "Moving Average":
-                self.sc.sm_strategy = MovingAverage()
+                self.sm_strategy = MovingAverage()
         self.strategy_changed.emit()
 
     def change_params(self, new_params: dict) -> None:
