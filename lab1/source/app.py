@@ -6,10 +6,11 @@ from PySide6.QtCore import Signal
 from PySide6.QtWebEngineWidgets import QWebEngineView
 from PySide6.QtWidgets import QInputDialog, QMainWindow, QStackedLayout, QTextEdit
 
+from functools import partial
 from designed_ui.designed_interface import Ui_MainWindow
 from source.plot import PlotLayout
 
- # from designed_interface import Ui_MainWindow
+# from designed_interface import Ui_MainWindow
 
 
 class MainWindow(QMainWindow, Ui_MainWindow):
@@ -27,6 +28,11 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         # ---------------------------- connections----------------------------------------
         self.noise_slider.valueChanged.connect(self.show_noise)
         self.noise_slider.valueChanged.connect(self.plot_lay.change_noise_lvl)
+        self.average_radio.toggled.connect(self.average_checked)
+        self.exp_radio.toggled.connect(self.exp_checked)
+        self.gausse_radio.toggled.connect(self.gausse_checked)
+        self.median_radio.toggled.connect(self.median_checked)
+
         # self.text_btn.clicked.connect(self.show_text)
         # self.render_btn.clicked.connect(self.show_html)
         # self.generate_btn.clicked.connect(self.generate)
@@ -41,4 +47,22 @@ class MainWindow(QMainWindow, Ui_MainWindow):
 
     def show_noise(self, value: int):
         self.noise_line.setText(f'{value/100} ')
+
+    def average_checked(self):
+        self.plot_lay.change_strategy("Moving Average")
+        self.plot_lay.change_noise_lvl(self.noise_slider.value())
+
+    def exp_checked(self):
+        self.plot_lay.change_strategy("Exponential")
+        self.plot_lay.change_noise_lvl(self.noise_slider.value())
+
+    def gausse_checked(self):
+        self.plot_lay.change_strategy("Gaussian")
+        self.plot_lay.change_noise_lvl(self.noise_slider.value())
+
+    def median_checked(self):
+        self.plot_lay.change_strategy("Median")
+        self.plot_lay.change_noise_lvl(self.noise_slider.value())
+
+
 
