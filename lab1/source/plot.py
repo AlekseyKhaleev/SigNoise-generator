@@ -1,6 +1,7 @@
 import numpy as np
 
 import matplotlib
+from PySide6.QtCore import Signal
 from PySide6.QtWidgets import QVBoxLayout, QWidget
 from matplotlib.backends.backend_qt5agg import FigureCanvasQTAgg, NavigationToolbar2QT as NavigationToolbar
 from matplotlib.figure import Figure
@@ -20,40 +21,54 @@ class MplCanvas(FigureCanvasQTAgg):
 
 
 class PlotLayout(QVBoxLayout, QWidget):
+    noise_lvl_changed = Signal()
+    strategy_changed = Signal()
+    params_changed = Signal()
 
-    def __init__(self, *args, **kwargs):
+    def __init__(self, /, a1, a2, a3, b1, b2, b3, x0, xk, dx, *args, **kwargs, ):
         super(PlotLayout, self).__init__(*args, **kwargs)
+        # ---------------------------- connections----------------------------------------
+        self.noise_lvl_changed.connect(self.draw_plot)
+        self.strategy_changed.connect(self.draw_plot)
+        self.params_changed.connect(self.draw_plot)
 
+        # ---------------------------------------------------------------------------------
+
+        self.params = {'a1': a1, 'a2': a2, 'a3': a3, 'b1': b1, 'b2': b2, 'b3': b3, 'x0': x0, 'xk': xk, 'dx': dx}
         # Create the maptlotlib FigureCanvas object,
         self.sc = MplCanvas(Exponential(), self, width=5, height=4, dpi=100)
 
         # Generate the signal
-        a1, b1, a2, b2, a3, b3 = 1, 2, 2, 4, 0.5, 6
-        x0, xk, dx = 0, 10, 0.1
-        self.x = np.arange(x0, xk, dx)
-        self.y = a1 * np.sin(b1 * self.x) + a2 * np.sin(b2 * self.x) + a3 * np.sin(b3 * self.x)
-
-        self.change_noise_lvl(0)
+        self.noise_lvl = 0
 
         # Create toolbar, passing canvas as first parament, parent (self, the MainWindow) as second.
         toolbar = NavigationToolbar(self.sc, self)
 
         self.addWidget(toolbar)
         self.addWidget(self.sc)
+        self.draw_plot()
+
+
 
     def change_noise_lvl(self, lvl):
+        self.noise_lvl = lvl/100
+        self.noise_lvl_changed.emit()
+
+    def draw_plot(self):
         # Сначала очистим предыдущий график
         self.sc.axes.clear()
-        lvl /= 100
+
+        x = np.arange(self.params['x0'], self.params['xk'], self.params['dx'])
+        y = self.params['a1'] * np.sin(self.params['b1'] * x) + self.params['a2'] * np.sin(
+            self.params['b2'] * x) + self.params['a3'] * np.sin(self.params['b3'] * x)
         # Генерация шума и добавление его к y
-        noise = np.random.normal(0, lvl, len(self.y))
-        y_noisy = self.y + noise
-        window_size = 5
+        noise = np.random.normal(0, self.noise_lvl, len(y))
+        y_noisy = y + noise
         y_smooth = self.sc.sm_strategy.get_y(y_noisy)
 
-        self.sc.axes.plot(self.x, self.y, label='Original Signal')
-        self.sc.axes.plot(self.x, y_noisy, label='Noisy Signal')
-        self.sc.axes.plot(self.x, y_smooth, label='Smoothed Signal')
+        self.sc.axes.plot(x, y, label='Оригинальный сигнал')
+        self.sc.axes.plot(x, y_noisy, label='Искаженный сигнал')
+        self.sc.axes.plot(x, y_smooth, label='Восстановленный сигнал')
 
         # Восстановление легенды и других элементов графика, если они есть
         self.sc.axes.legend(loc='lower left')
@@ -73,3 +88,8 @@ class PlotLayout(QVBoxLayout, QWidget):
                 self.sc.sm_strategy = Median()
             case "Moving Average":
                 self.sc.sm_strategy = MovingAverage()
+        self.strategy_changed.emit()
+
+    def change_params(self, new_params: dict) -> None:
+        self.params = new_params
+        self.params_changed.emit()

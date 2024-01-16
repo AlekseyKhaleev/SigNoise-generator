@@ -22,9 +22,14 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         super().__init__()
         self.setupUi(self)
         self.current_dir = os.path.dirname(os.path.abspath(__file__))
-        self.show_noise(0)
-        self.plot_lay = PlotLayout()
+
+        self.plot_lay = PlotLayout(self.a1_spin.value(), self.a2_spin.value(), self.a3_spin.value(),
+                                   self.b1_spin.value(), self.b2_spin.value(), self.b3_spin.value(),
+                                   self.x0_spin.value(), self.xk_spin.value(), self.dx_spin.value())
         self.plot_area.setLayout(self.plot_lay)
+        self.average_checked()
+        self.change_func_label()
+
         # ---------------------------- connections----------------------------------------
         self.noise_slider.valueChanged.connect(self.show_noise)
         self.noise_slider.valueChanged.connect(self.plot_lay.change_noise_lvl)
@@ -33,36 +38,41 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.gausse_radio.toggled.connect(self.gausse_checked)
         self.median_radio.toggled.connect(self.median_checked)
 
-        # self.text_btn.clicked.connect(self.show_text)
-        # self.render_btn.clicked.connect(self.show_html)
-        # self.generate_btn.clicked.connect(self.generate)
-        # self.clear_btn.clicked.connect(self.text_edit.clear)
-        # self.clear_btn.clicked.connect(self.show_text)
-        # self.save_btn.clicked.connect(self.save_modal)
-        # self.load_btn.clicked.connect(self.load_template)
-        # self.temp_saved.connect(self.update_templates)
-        # self.temp_loaded.connect(self.show_text)
-        # self.temp_generated.connect(self.show_text)
+        self.a1_spin.valueChanged.connect(self.change_params)
+        self.a2_spin.valueChanged.connect(self.change_params)
+        self.a3_spin.valueChanged.connect(self.change_params)
+        self.b1_spin.valueChanged.connect(self.change_params)
+        self.b2_spin.valueChanged.connect(self.change_params)
+        self.b3_spin.valueChanged.connect(self.change_params)
+        self.x0_spin.valueChanged.connect(self.change_params)
+        self.xk_spin.valueChanged.connect(self.change_params)
+        self.dx_spin.valueChanged.connect(self.change_params)
+
         # ---------------------------------------------------------------------------------
 
     def show_noise(self, value: int):
-        self.noise_line.setText(f'{value/100} ')
+        self.noise_line.setText(f'{value / 100} ')
 
     def average_checked(self):
         self.plot_lay.change_strategy("Moving Average")
-        self.plot_lay.change_noise_lvl(self.noise_slider.value())
 
     def exp_checked(self):
         self.plot_lay.change_strategy("Exponential")
-        self.plot_lay.change_noise_lvl(self.noise_slider.value())
 
     def gausse_checked(self):
         self.plot_lay.change_strategy("Gaussian")
-        self.plot_lay.change_noise_lvl(self.noise_slider.value())
 
     def median_checked(self):
         self.plot_lay.change_strategy("Median")
-        self.plot_lay.change_noise_lvl(self.noise_slider.value())
 
+    def change_params(self):
+        self.plot_lay.change_params({'a1': self.a1_spin.value(), 'a2': self.a2_spin.value(), 'a3': self.a3_spin.value(),
+                                     'b1': self.b1_spin.value(), 'b2': self.b2_spin.value(), 'b3': self.b3_spin.value(),
+                                     'x0': self.x0_spin.value(), 'xk': self.xk_spin.value(),
+                                     'dx': self.dx_spin.value()})
+        self.change_func_label()
 
-
+    def change_func_label(self):
+        self.func_label.setText(f"y(x) = {self.a1_spin.value(): .2f} sin({self.b1_spin.value(): .2f} x) + "
+                                f"{self.a2_spin.value(): .2f} sin({self.b2_spin.value(): .2f} x) + "
+                                f"{self.a3_spin.value(): .2f} sin({self.b3_spin.value(): .2f} x)")
