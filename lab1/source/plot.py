@@ -31,6 +31,7 @@ class PlotLayout(QVBoxLayout, QWidget):
         self.noise_lvl_changed.connect(self.draw_plot)
         self.strategy_changed.connect(self.draw_plot)
         self.params_changed.connect(self.draw_plot)
+        self.y_scale = 0
 
         # ---------------------------------------------------------------------------------
 
@@ -72,8 +73,13 @@ class PlotLayout(QVBoxLayout, QWidget):
 
         # Восстановление легенды и других элементов графика, если они есть
         self.sc.axes.legend(loc='lower left')
-        # Зафиксировать ось Y, например, от 0 до 10
-        self.sc.axes.set_ylim([-5, 5])
+        # Зафиксировать ось Y
+        self.sc.axes.set_ylim([-5 - self.y_scale, 5 + self.y_scale])
+        # Задать название графика
+        self.sc.axes.set_title('Исследуемая функция:\n'  
+                               f"y(x) = {self.params['a1']: .2f} * sin({self.params['b1']: .2f} * x) + "
+                               f"{self.params['a2']: .2f} * sin({self.params['b2']: .2f} * x) + "
+                               f"{self.params['a3']: .2f} * sin({self.params['b3']: .2f} * x)")
 
         # Перерисовка графика
         self.sc.draw()
@@ -92,4 +98,14 @@ class PlotLayout(QVBoxLayout, QWidget):
 
     def change_params(self, new_params: dict) -> None:
         self.params = new_params
+        self.params_changed.emit()
+
+    def y_scale_inc(self):
+        self.y_scale += 1
+        self.params_changed.emit()
+
+    def y_scale_dec(self):
+        if self.y_scale == 0:
+            return
+        self.y_scale -= 1
         self.params_changed.emit()

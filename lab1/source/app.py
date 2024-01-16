@@ -28,7 +28,6 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                    self.x0_spin.value(), self.xk_spin.value(), self.dx_spin.value())
         self.plot_area.setLayout(self.plot_lay)
         self.average_checked()
-        self.change_func_label()
 
         # ---------------------------- connections----------------------------------------
         self.noise_slider.valueChanged.connect(self.show_noise)
@@ -47,6 +46,8 @@ class MainWindow(QMainWindow, Ui_MainWindow):
         self.x0_spin.valueChanged.connect(self.change_params)
         self.xk_spin.valueChanged.connect(self.change_params)
         self.dx_spin.valueChanged.connect(self.change_params)
+        self.scale_inc_button.clicked.connect(self.plot_lay.y_scale_inc)
+        self.scale_dec_button.clicked.connect(self.plot_lay.y_scale_dec)
 
         # ---------------------------------------------------------------------------------
 
@@ -70,9 +71,5 @@ class MainWindow(QMainWindow, Ui_MainWindow):
                                      'b1': self.b1_spin.value(), 'b2': self.b2_spin.value(), 'b3': self.b3_spin.value(),
                                      'x0': self.x0_spin.value(), 'xk': self.xk_spin.value(),
                                      'dx': self.dx_spin.value()})
-        self.change_func_label()
 
-    def change_func_label(self):
-        self.func_label.setText(f"y(x) = {self.a1_spin.value(): .2f} sin({self.b1_spin.value(): .2f} x) + "
-                                f"{self.a2_spin.value(): .2f} sin({self.b2_spin.value(): .2f} x) + "
-                                f"{self.a3_spin.value(): .2f} sin({self.b3_spin.value(): .2f} x)")
+
