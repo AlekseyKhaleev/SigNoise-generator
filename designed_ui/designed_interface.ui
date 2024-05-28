@@ -11,7 +11,7 @@
    </rect>
   </property>
   <property name="windowTitle">
-   <string>21-ВМз Халеев А.А. МиСОС Лаб1</string>
+   <string>SigNoise-generator by Aleksey Khaleev</string>
   </property>
   <widget class="QWidget" name="centralwidget">
    <widget class="QWidget" name="plot_area" native="true">

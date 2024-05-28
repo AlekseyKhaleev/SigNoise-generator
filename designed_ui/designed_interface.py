@@ -153,7 +153,7 @@ class Ui_MainWindow(object):
     # setupUi
 
     def retranslateUi(self, MainWindow):
-        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"21-\u0412\u041c\u0437 \u0425\u0430\u043b\u0435\u0435\u0432 \u0410.\u0410. \u041c\u0438\u0421\u041e\u0421 \u041b\u0430\u04311", None))
+        MainWindow.setWindowTitle(QCoreApplication.translate("MainWindow", u"SigNoise-generator by Aleksey Khaleev", None))
         self.noise_label.setText(QCoreApplication.translate("MainWindow", u"\u0423\u0440\u043e\u0432\u0435\u043d\u044c \u0448\u0443\u043c\u0430", None))
         self.noise_line.setText(QCoreApplication.translate("MainWindow", u"0.00", None))
         self.filter_box.setTitle(QCoreApplication.translate("MainWindow", u"\u0424\u0438\u043b\u044c\u0442\u0440", None))
