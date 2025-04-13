@@ -28,8 +28,8 @@
 
 1. **Клонируйте репозиторий**:
     ```bash
-    git clone https://github.com/yourusername/function-plotter-with-noise-and-filters.git
-    cd function-plotter-with-noise-and-filters
+    git clone https://github.com/AlekseyKhaleev/SigNoise-generator
+    cd SigNoise-generator
     ```
 
 2. **Установите Poetry** (если еще не установлен):
@@ -44,7 +44,7 @@
 
 4. **Запустите приложение**:
     ```bash
-    poetry run python main_app.py
+    poetry run python main.py
     ```
 
 ## Использование
